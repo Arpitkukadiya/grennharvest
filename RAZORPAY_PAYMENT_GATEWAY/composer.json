@@ -1,0 +1,12 @@
+{
+    "name": "keshakalariya/razorpay_payment_gateway",
+    "description": "Razorpay Payment Gateway integration demo in PHP",
+    "autoload": {
+        "psr-4": {
+            "Keshakalariya\\RazorpayPaymentGateway\\": "src/"
+        }
+    },
+    "require": {
+        "razorpay/razorpay": "^2.9"
+    }
+}
