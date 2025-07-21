@@ -1,40 +1,58 @@
 <?php
 session_start();
-include 'config.php';
+include('config.php'); // DB connection
 
-if (!isset($_SESSION['customer_id'])) {
-    header('Location: customer_login.php');
-    exit();
+$customer_id = $_SESSION['customer_id'] ?? 1; // Replace with actual session in production
+
+// Add to cart handler
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crop_id'])) {
+    $crop_id = $_POST['crop_id'];
+    $quantity = $_POST['quantity'];
+
+    // Check crop details
+    $cropStmt = $conn->prepare("SELECT * FROM crops WHERE id = ?");
+    $cropStmt->execute([$crop_id]);
+    $crop = $cropStmt->fetch();
+
+    if ($crop && $quantity > 0) {
+    // Check if already in cart
+    $cartCheck = $conn->prepare("SELECT * FROM carts WHERE customer_id = ? AND crop_id = ?");
+    $cartCheck->execute([$customer_id, $crop_id]);
+
+    if ($cartCheck->rowCount() > 0) {
+        // If exists, update quantity
+        $updateCart = $conn->prepare("UPDATE carts SET quantity = quantity + ? WHERE customer_id = ? AND crop_id = ?");
+        $updateCart->execute([$quantity, $customer_id, $crop_id]);
+    } else {
+        // Otherwise insert new
+        $insert = $conn->prepare("INSERT INTO carts (customer_id, crop_id, quantity) VALUES (?, ?, ?)");
+        $insert->execute([$customer_id, $crop_id, $quantity]);
+    }
+
+    $success = "Crop added to cart successfully!";
+}
+ else {
+        $error = "Invalid crop or quantity.";
+    }
 }
 
-$customer_id = $_SESSION['customer_id'];
-
-// Fetch customer details
-$stmt = $conn->prepare("SELECT name, city FROM customers WHERE id = ?");
-$stmt->execute([$customer_id]);
-$customer = $stmt->fetch();
-
-// Fetch crops information for customer
-$stmt = $conn->prepare("SELECT c.id, c.name AS crop_name, c.description, c.price_per_kg, c.season, c.certificate_available, f.name AS farmer_name, c.video, f.id AS farmer_id FROM crops c JOIN farmers f ON c.farmer_id = f.id");
-$stmt->execute();
-$crops = $stmt->fetchAll();
+// ✅ Fix: Check if 'city' column exists in DB
+$farmerStmt = $conn->query("SELECT DISTINCT f.id, f.name FROM farmers f JOIN crops c ON f.id = c.farmer_id");
+$farmers = $farmerStmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        /* Global Theme */
         body {
             background-color: #f8f9fa;
             font-family: 'Roboto', sans-serif;
         }
 
-        /* Navbar */
         .navbar {
             background-color: #2c3e50;
             padding: 15px 20px;
@@ -53,7 +71,6 @@ $crops = $stmt->fetchAll();
             color: #f1c40f !important;
         }
 
-        /* Hero Section */
         .hero-section {
             background: linear-gradient(to right, #2c3e50, #4a69bd);
             color: white;
@@ -61,7 +78,6 @@ $crops = $stmt->fetchAll();
             text-align: center;
         }
 
-        /* Cards */
         .card {
             border: none;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -77,11 +93,9 @@ $crops = $stmt->fetchAll();
             background: #4a69bd;
             color: white;
             font-weight: bold;
-            text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
         }
 
-        /* Buttons */
         .btn-primary {
             background-color: #4a69bd;
             border: none;
@@ -89,15 +103,7 @@ $crops = $stmt->fetchAll();
         .btn-primary:hover {
             background-color: #1e3799;
         }
-        .btn-success {
-            background-color: #38ada9;
-            border: none;
-        }
-        .btn-success:hover {
-            background-color: #079992;
-        }
 
-        /* Footer */
         .footer {
             background-color: #2c3e50;
             color: white;
@@ -109,50 +115,71 @@ $crops = $stmt->fetchAll();
 </head>
 <body>
 
-<?php include "navbar.php" ?>
-<!-- Hero Section -->
+<?php include 'navbar.php'; ?>
+
 <div class="hero-section">
-    <h1>Welcome, <?php echo htmlspecialchars($customer['name']); ?> !</h1>
-    <p>Explore organic and fresh crops directly from trusted farmers.</p>
+    <h1>Welcome to GreenHarvest</h1>
+    <p>Order fresh and organic produce directly from farmers</p>
 </div>
 
-<!-- Main Content -->
-<div class="container-fluied mx-4 mt-5">
-    <div class="row">
-        <?php if (count($crops) > 0): ?>
-            <?php foreach ($crops as $crop): ?>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <?php echo htmlspecialchars($crop['crop_name']); ?>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Description:</strong> <?php echo htmlspecialchars($crop['description']); ?></p>
-                            <p><strong>Price per KG:</strong> ₹<?php echo htmlspecialchars($crop['price_per_kg']); ?></p>
-                            <p><strong>Season:</strong> <?php echo htmlspecialchars($crop['season']); ?></p>
-                            <p><strong>Farmer:</strong> <?php echo htmlspecialchars($crop['farmer_name']); ?></p>
-                            <p><strong>Certified:</strong> <?php echo $crop['certificate_available'] ? 'Yes' : 'No'; ?></p>
-                            <div class="d-grid gap-2">
-                                <a href="order.php?crop_id=<?php echo $crop['id']; ?>" class="btn btn-primary">Book a Crop</a>
-                                <a href="farm_visit_form.php?farmer_id=<?php echo $crop['farmer_id']; ?>" class="btn btn-success">Request Farm Visit</a>
+<div class="container mt-4">
+    <?php if (isset($success)): ?>
+        <div class="alert alert-success"><?= $success ?></div>
+    <?php elseif (isset($error)): ?>
+        <div class="alert alert-danger"><?= $error ?></div>
+    <?php endif; ?>
+
+    <?php foreach ($farmers as $farmer): ?>
+        <div class="card my-4">
+            <div class="card-header">
+                Farmer: <?= htmlspecialchars($farmer['name']) ?> 
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <?php
+                    $cropStmt = $conn->prepare("SELECT * FROM crops WHERE farmer_id = ?");
+                    $cropStmt->execute([$farmer['id']]);
+                    $crops = $cropStmt->fetchAll();
+
+                    if (count($crops) > 0):
+                        foreach ($crops as $crop):
+                    ?>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <?php if (!empty($crop['image'])): ?>
+                                    <img src="<?= htmlspecialchars($crop['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($crop['name']) ?>" style="height: 200px; object-fit: cover;">
+                                <?php endif; ?>
+                                <div class="card-body">
+                                    <h5 class="card-title"><?= htmlspecialchars($crop['name']) ?></h5>
+                                    <p class="card-text"><?= htmlspecialchars($crop['description']) ?></p>
+                                    <p><strong>Price:</strong> ₹<?= $crop['price_per_kg'] ?>/kg</p>
+                                    <form method="POST">
+                                        <input type="hidden" name="crop_id" value="<?= $crop['id'] ?>">
+                                        <div class="form-group">
+                                            <label>Quantity (kg):</label>
+                                            <input type="number" name="quantity" min="1" required class="form-control">
+                                        </div>
+                                   <button type="submit" class="btn btn-primary btn-block mt-2">Add to cart</button>
+
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    <?php
+                        endforeach;
+                    else:
+                        echo "<p class='mx-3'>No crops available for this farmer.</p>";
+                    endif;
+                    ?>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="text-center w-100">No crops available at the moment.</p>
-        <?php endif; ?>
-    </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
 </div>
 
-<!-- Footer -->
 <div class="footer">
     &copy; 2025 GreenHarvest - Connecting Farmers & Consumers
 </div>
-
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

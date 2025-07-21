@@ -36,6 +36,9 @@
                 <li class="nav-item"><a class="nav-link" href="customer_profile.php">Profile</a></li>
                 <li class="nav-item"><a class="nav-link" href="order_history.php">Order History</a></li>
                 <li class="nav-item"><a class="nav-link" href="visit_history.php">Visit History</a></li>
+                <li class="nav-item"><a class="nav-link" href="view_cart.php">View Cart</a></li>
+           
+
                 <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
             </ul>
         </div>
