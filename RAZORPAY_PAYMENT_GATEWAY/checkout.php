@@ -98,20 +98,24 @@ $razorpayOrderId = $razorpayOrder['id'];
 <div class="payment-card">
     <div class="emoji-header">🌱 GreenHarvest Payment</div>
     <h2>Crop Order Checkout</h2>
-    <p><strong>Crop:</strong> <?= htmlspecialchars($order['crop_name']) ?></p>
-    <p><strong>Quantity:</strong> <?= htmlspecialchars($order['quantity']) ?> KG</p>
+    <p><strong>Items:</strong></p>
+<ul style="text-align: left; padding-left: 20px;">
+    <?php foreach ($order['items'] as $item): ?>
+        <li><?= htmlspecialchars($item['crop_name']) ?> - <?= $item['quantity'] ?> kg @ ₹<?= $item['price_per_kg'] ?>/kg</li>
+    <?php endforeach; ?>
+</ul>
+
     <p><strong>Payment Method:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
     <div class="price-tag">₹<?= htmlspecialchars($order['total_price']) ?></div>
     <button id="rzp-button" class="btn-pay">💳 Pay Now Securely</button>
-</div>
-
+</div><!-- 👇 Replace your Razorpay `handler:` block with this -->
 <script>
     var options = {
         "key": "<?= $keyId ?>",
         "amount": "<?= $totalAmount ?>",
         "currency": "INR",
         "name": "GreenHarvest 🌾",
-        "description": "<?= htmlspecialchars($order['quantity']) ?> KG of <?= htmlspecialchars($order['crop_name']) ?>",
+        "description": "Multiple crop items order",
         "order_id": "<?= $razorpayOrderId ?>",
         "handler": function (response) {
             var form = document.createElement("form");
@@ -121,7 +125,9 @@ $razorpayOrderId = $razorpayOrder['id'];
             var inputs = {
                 "razorpay_payment_id": response.razorpay_payment_id,
                 "razorpay_order_id": response.razorpay_order_id,
-                "razorpay_signature": response.razorpay_signature
+                "razorpay_signature": response.razorpay_signature,
+                // 👇 Serialize order data
+                "order_data_json": JSON.stringify(<?= json_encode($order) ?>)
             };
 
             for (var key in inputs) {
@@ -145,11 +151,15 @@ $razorpayOrderId = $razorpayOrder['id'];
         }
     };
 
-    document.getElementById('rzp-button').onclick = function(e) {
-        var rzp = new Razorpay(options);
-        rzp.open();
-        e.preventDefault();
-    };
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('rzp-button').onclick = function (e) {
+            var rzp = new Razorpay(options);
+            rzp.open();
+            e.preventDefault();
+        };
+    });
+
+    
 </script>
 
 </body>

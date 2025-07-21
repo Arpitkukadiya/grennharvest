@@ -99,15 +99,29 @@ if (
 
         if ($orderData && $customer_id) {
             // 1. Insert into orders table
-            $stmt = $conn->prepare("INSERT INTO orders (customer_id, crop_id, quantity, total_price, payment_method, status, order_date) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-            $stmt->execute([
-                $orderData['customer_id'],
-                $orderData['crop_id'],
-                $orderData['quantity'],
-                $orderData['total_price'],
-                'online',
-                'paid'
-            ]);
+           // 1. Insert into orders table
+$stmt = $conn->prepare("INSERT INTO orders (customer_id, total_price, payment_method, status, order_date) VALUES (?, ?, ?, ?, NOW())");
+$stmt->execute([
+    $customer_id,
+    $orderData['total_price'],
+    'online',
+    'paid'
+]);
+
+$order_id = $conn->lastInsertId();
+
+// 2. Insert each item into order_items
+if (!empty($orderData['items'])) {
+    $stmt = $conn->prepare("INSERT INTO order_items (order_id, crop_id, quantity, price_per_kg) VALUES (?, ?, ?, ?)");
+    foreach ($orderData['items'] as $item) {
+        $stmt->execute([
+            $order_id,
+            $item['crop_id'],
+            $item['quantity'],
+            $item['price_per_kg']
+        ]);
+    }
+}
 
             $order_id = $conn->lastInsertId();
 

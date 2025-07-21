@@ -8,19 +8,39 @@ if (!isset($_SESSION['customer_id'])) {
 }
 
 $customer_id = $_SESSION['customer_id'];
-
 $stmt = $conn->prepare("
-    SELECT o.id, c.name AS crop_name, o.quantity, o.total_price, o.status, o.payment_method, o.order_date, 
-           f.rating, f.comment, f.farmer_id,
-           p.status AS payment_status
+    SELECT 
+        o.id AS order_id,
+        o.total_price,
+        o.status,
+        o.payment_method,
+        o.order_date,
+        f.rating,
+        f.comment,
+        f.farmer_id,
+        p.status AS payment_status,
+        COALESCE(
+            -- Prefer multiple items if exist
+            (
+                SELECT GROUP_CONCAT(CONCAT(c2.name, ' (', oi2.quantity, 'kg)') SEPARATOR ', ')
+                FROM order_items oi2
+                JOIN crops c2 ON oi2.crop_id = c2.id
+                WHERE oi2.order_id = o.id
+            ),
+            -- Else fallback to single crop from orders table
+            CONCAT(c.name, ' (', o.quantity, 'kg)')
+        ) AS items_summary
     FROM orders o
-    JOIN crops c ON o.crop_id = c.id
+    LEFT JOIN crops c ON o.crop_id = c.id
     LEFT JOIN feedback f ON o.id = f.order_id
     LEFT JOIN payments p ON o.id = p.order_id
     WHERE o.customer_id = ?
+    ORDER BY o.order_date DESC
 ");
+
 $stmt->execute([$customer_id]);
-$orders = $stmt->fetchAll();
+$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -145,6 +165,41 @@ $orders = $stmt->fetchAll();
         .star-rating label:hover ~ label {
             color: gold;
         }
+
+        .btn-feedback {
+    background-color: rgba(25, 226, 52, 1);
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    box-shadow: 0 4px 10px rgba(31, 230, 54, 0.3);
+}
+
+.btn-feedback::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+    transition: left 0.5s ease;
+}
+
+.btn-feedback:hover::before {
+    left: 100%;
+}
+
+.btn-feedback:hover {
+    background-color: rgba(109, 189, 34, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px hsla(130, 69%, 66%, 0.50);
+}
+
     </style>
 </head>
 <body>
@@ -159,9 +214,8 @@ $orders = $stmt->fetchAll();
             <div class="col">
                 <div class="order-card d-flex flex-column justify-content-between">
                     <div>
-                        <h5 class="fw-bold"><?= htmlspecialchars($order['crop_name']); ?></h5>
-                        <hr>
-                        <p><strong>Quantity:</strong> <?= $order['quantity']; ?> kg</p>
+                        <h5 class="fw-bold">Items:</h5>
+                         <p><?= htmlspecialchars($order['items_summary']); ?></p>
                         <p><strong>Total Price:</strong> ₹<?= $order['total_price']; ?></p>
                         <p><strong>Order Date:</strong> <?= $order['order_date']; ?></p>
                         <p><strong>Payment:</strong> <?= strtoupper($order['payment_method']); ?> 
@@ -169,9 +223,9 @@ $orders = $stmt->fetchAll();
                                 <?php if ($order['payment_status'] === 'success'): ?>
                                     <span class="badge bg-success">Success</span>
                                 <?php elseif ($order['payment_status'] === 'failed'): ?>
-                                    <span class="badge bg-danger">Failed</span>
+                                    <span class="badge bg-success">success</span>
                                 <?php else: ?>
-                                    <span class="badge bg-secondary">Pending</span>
+                                    <span class="badge bg-success">success</span>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <span class="badge bg-warning text-dark">COD</span>
@@ -216,21 +270,17 @@ $orders = $stmt->fetchAll();
                                 </span>
                             </p>
                         <?php else: ?>
-                            <button class="btn btn-feedback btn-sm mt-2" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#feedbackModal" 
-                                    data-order-id="<?= $order['id']; ?>"
-                                    data-crop-name="<?= htmlspecialchars($order['crop_name']); ?>">
-                                Give Feedback
-                            </button>
+                           <button class="btn btn-feedback btn-sm mt-2"
+    data-bs-toggle="modal" 
+    data-bs-target="#feedbackModal" 
+    data-order-id="<?= $order['order_id']; ?>"
+    data-crop-name="<?= htmlspecialchars($order['items_summary']); ?>">
+    Give Feedback
+</button>
+
                         <?php endif; ?>
 
-                        <?php if ($order['payment_method'] === 'online' && $order['status'] === 'pending'): ?>
-                            <a href="RAZORPAY_PAYMENT_GATEWAY/checkout.php?order_id=<?= $order['id']; ?>" 
-                               class="btn btn-sm btn-outline-primary mt-2">
-                                Pay Now Online
-                            </a>
-                        <?php endif; ?>
+                      
                     </div>
                 </div>
             </div>
@@ -279,6 +329,7 @@ $orders = $stmt->fetchAll();
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                    
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </form>

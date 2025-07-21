@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 05, 2025 at 06:43 PM
+-- Generation Time: Jul 21, 2025 at 04:26 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -20,6 +20,27 @@ SET time_zone = "+00:00";
 --
 -- Database: `greenharvest`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `carts`
+--
+
+CREATE TABLE `carts` (
+  `id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `crop_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `carts`
+--
+
+INSERT INTO `carts` (`id`, `customer_id`, `crop_id`, `quantity`, `created_at`) VALUES
+(10, 13, 3, 50, '2025-07-21 14:24:55');
 
 -- --------------------------------------------------------
 
@@ -46,7 +67,8 @@ CREATE TABLE `crops` (
 
 INSERT INTO `crops` (`id`, `farmer_id`, `name`, `description`, `image`, `season`, `price_per_kg`, `video`, `insurance_status`, `certificate_available`) VALUES
 (1, 1, 'corn', '2+ Million Crop Farming Royalty.', NULL, 'summer ', 100.00, 'uploads/videos/WhatsApp Video 2025-03-02 at 1.33.18 PM.mp4', 'insured', 1),
-(2, 1, 'pentuens ', 'pentuens 100% real', NULL, 'summer ', 1200.00, 'uploads/videos/WhatsApp_Video_2025-03-02_at_1.33.18_PM.mp4', 'insured', 1);
+(2, 1, 'pentuens ', 'pentuens 100% real', NULL, 'summer ', 1200.00, 'uploads/videos/WhatsApp_Video_2025-03-02_at_1.33.18_PM.mp4', 'insured', 1),
+(3, 10, '123', '123', NULL, 'summer ', 12.00, NULL, 'insured', 1);
 
 -- --------------------------------------------------------
 
@@ -72,7 +94,8 @@ CREATE TABLE `customers` (
 INSERT INTO `customers` (`id`, `name`, `email`, `password`, `city`, `otp`, `is_verified`, `pass_key`) VALUES
 (1, 'daku', 'kukadiyavarshil1@gmail.com', '$2y$10$hdSAFAgQswSJ6ea9uZOsrOa2.bG4Pn1o1Vbk8IIdf.OkfT6w0jaQ6', 'Amreli', NULL, 0, NULL),
 (7, 'bapu', 'kukadiyavarshil11@gmail.com', '$2y$10$geeS.JrqIxT0GDPMFMCC5e6zMDb7HcKCo.7VPHuF/yrsdHGME8UCe', 'Amreli', NULL, 1, NULL),
-(13, 'varshil', 'kukadiyavarshil@gmail.com', '$2y$10$qOpPADOVPSqaqpx9vcgu9eUDEWWIoAvZLrhdttWEDJTOy9l2RjDFi', 'kanpar', NULL, 1, NULL);
+(13, 'varshil', 'kukadiyavarshil@gmail.com', '$2y$10$qOpPADOVPSqaqpx9vcgu9eUDEWWIoAvZLrhdttWEDJTOy9l2RjDFi', 'kanpar', NULL, 1, NULL),
+(14, 'Bapu', 'bapu@gmail.com', '$2y$10$ndu2HP0R3xMOZTQ6KUQh2uxzAyiFjhge8wxxQZH4TMbiUcoLsaEnK', 'Bapu', NULL, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -126,7 +149,8 @@ CREATE TABLE `farm_visits` (
 INSERT INTO `farm_visits` (`id`, `farmer_id`, `customer_id`, `date`, `description`, `status`) VALUES
 (1, 1, 1, '2025-06-13', 'i see my corn crop.', 'approved'),
 (2, 1, 7, '2025-06-18', 'sa', 'approved'),
-(3, 1, 13, '2025-06-30', 'hello i want a farm visit', 'requested');
+(3, 1, 13, '2025-06-30', 'hello i want a farm visit', 'requested'),
+(4, 1, 14, '2025-07-18', 'Test for me', 'requested');
 
 -- --------------------------------------------------------
 
@@ -178,10 +202,49 @@ CREATE TABLE `orders` (
 INSERT INTO `orders` (`id`, `customer_id`, `crop_id`, `quantity`, `total_price`, `status`, `order_date`, `advance_payment`, `farmer_id`, `payment_method`, `payment_id`) VALUES
 (1, 1, 1, 100, 10000.00, 'delivered', '2025-06-10 10:23:57', NULL, NULL, 'cod', NULL),
 (2, 7, 1, 12, 1200.00, 'delivered', '2025-06-14 11:22:23', NULL, NULL, 'cod', NULL),
-(25, 13, 2, 9, 10800.00, 'delivered', '2025-06-27 17:45:39', NULL, NULL, 'cod', NULL),
-(28, 13, 2, 5, 6000.00, 'delivered', '2025-06-27 17:55:20', NULL, NULL, 'online', NULL),
-(29, 13, 2, 1, 1200.00, 'delivered', '2025-06-28 09:28:36', NULL, NULL, 'online', NULL),
-(31, 13, 1, 8, 800.00, 'delivered', '2025-06-28 10:09:10', NULL, NULL, 'online', NULL);
+(43, 13, NULL, NULL, 15600.00, '', '2025-07-21 17:51:06', NULL, NULL, 'online', NULL),
+(44, 13, NULL, NULL, 15600.00, '', '2025-07-21 18:01:31', NULL, NULL, 'online', NULL),
+(45, 13, NULL, NULL, 15600.00, '', '2025-07-21 18:01:44', NULL, NULL, 'online', NULL),
+(46, 13, NULL, NULL, 15600.00, '', '2025-07-21 18:01:55', NULL, NULL, 'online', NULL),
+(47, 13, NULL, NULL, 15600.00, '', '2025-07-21 18:02:05', NULL, NULL, 'online', NULL),
+(48, 13, NULL, NULL, 15600.00, '', '2025-07-21 18:03:23', NULL, NULL, 'online', NULL),
+(49, 13, NULL, NULL, 1200.00, '', '2025-07-21 18:18:44', NULL, NULL, 'online', NULL),
+(50, 13, NULL, NULL, 15600.00, '', '2025-07-21 18:21:39', NULL, NULL, 'online', NULL),
+(51, 13, NULL, NULL, 1200.00, '', '2025-07-21 18:22:53', NULL, NULL, 'online', NULL),
+(52, 13, 3, 100, 1200.00, 'pending', '2025-07-21 18:26:34', NULL, NULL, 'cod', NULL),
+(53, 13, NULL, NULL, 15600.00, '', '2025-07-21 18:27:08', NULL, NULL, 'online', NULL),
+(54, 13, NULL, NULL, 144.00, '', '2025-07-21 18:30:21', NULL, NULL, 'online', NULL),
+(55, 13, 2, 33, 39600.00, 'pending', '2025-07-21 19:54:15', NULL, NULL, 'cod', NULL),
+(56, 13, 1, 123, 12300.00, 'pending', '2025-07-21 19:54:15', NULL, NULL, 'cod', NULL),
+(57, 13, 3, 12, 144.00, 'pending', '2025-07-21 19:54:29', NULL, NULL, 'cod', NULL),
+(58, 13, NULL, NULL, 600.00, '', '2025-07-21 19:55:37', NULL, NULL, 'online', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_items`
+--
+
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `crop_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `price_per_kg` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `crop_id`, `quantity`, `price_per_kg`) VALUES
+(1, 50, 2, 12, 1200.00),
+(2, 50, 1, 12, 100.00),
+(3, 51, 3, 100, 12.00),
+(4, 53, 2, 12, 1200.00),
+(5, 53, 1, 12, 100.00),
+(6, 54, 3, 12, 12.00),
+(7, 58, 3, 50, 12.00);
 
 -- --------------------------------------------------------
 
@@ -206,13 +269,22 @@ CREATE TABLE `payments` (
 
 INSERT INTO `payments` (`id`, `razorpay_payment_id`, `razorpay_order_id`, `amount`, `status`, `created_at`, `customer_id`, `order_id`) VALUES
 (12, 'pay_QmDXZYqLBQ9Qzp', 'order_QmDX6u6XaDAWZx', 700.00, 'success', '2025-06-27 12:18:03', 13, NULL),
-(14, 'pay_QmDfEpy4h3h8nx', 'order_QmDeaRf40CgNZp', 6000.00, 'success', '2025-06-27 12:25:20', 13, 28),
-(15, 'pay_QmTZ7FEVKLLJ6k', 'order_QmTYcYUjgPWja1', 1200.00, 'success', '2025-06-28 03:58:36', 13, 29),
-(17, 'pay_QmUFucAbWhV2hi', 'order_QmUFSj6iNinqIc', 800.00, 'success', '2025-06-28 04:39:10', 13, 31);
+(21, 'pay_QvirvDbqIzAdji', 'order_Qvirn4VGpyIGIW', 1200.00, 'success', '2025-07-21 12:48:44', 13, 49),
+(22, 'pay_Qviw0yXYewQeY3', 'order_Qvivu38yuxXCpp', 15600.00, 'success', '2025-07-21 12:51:39', 13, 2),
+(23, 'pay_QvixIn9UMis6Qq', 'order_QvixAAhe5EjZt4', 1200.00, 'success', '2025-07-21 12:52:53', 13, 3),
+(24, 'pay_Qvj1nIthI0IlIu', 'order_Qvj1aghn7u0Fn7', 15600.00, 'success', '2025-07-21 12:57:08', 13, 5),
+(25, 'pay_Qvj5CO6gY2bcrn', 'order_Qvj54J9QkVo5An', 144.00, 'success', '2025-07-21 13:00:21', 13, 6),
+(26, 'pay_QvkXEvBfej8tcw', 'order_QvkWw4isVgs0JT', 600.00, 'success', '2025-07-21 14:25:37', 13, 7);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `carts`
+--
+ALTER TABLE `carts`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `crops`
@@ -262,6 +334,13 @@ ALTER TABLE `orders`
   ADD KEY `farmer_id` (`farmer_id`);
 
 --
+-- Indexes for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`);
+
+--
 -- Indexes for table `payments`
 --
 ALTER TABLE `payments`
@@ -272,16 +351,22 @@ ALTER TABLE `payments`
 --
 
 --
+-- AUTO_INCREMENT for table `carts`
+--
+ALTER TABLE `carts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
 -- AUTO_INCREMENT for table `crops`
 --
 ALTER TABLE `crops`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `farmers`
@@ -293,7 +378,7 @@ ALTER TABLE `farmers`
 -- AUTO_INCREMENT for table `farm_visits`
 --
 ALTER TABLE `farm_visits`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -305,13 +390,19 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+
+--
+-- AUTO_INCREMENT for table `order_items`
+--
+ALTER TABLE `order_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Constraints for dumped tables
@@ -345,6 +436,12 @@ ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`),
   ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`id`),
   ADD CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`farmer_id`) REFERENCES `farmers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
