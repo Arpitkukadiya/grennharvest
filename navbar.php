@@ -7,7 +7,7 @@
 
         /* Navbar */
         .navbar {
-            background-color: #2c3e50;
+           background: linear-gradient(145deg, rgba(46, 221, 104, 1), rgba(29, 107, 45, 1));
             padding: 8px 20px;
         }
         .navbar-brand {

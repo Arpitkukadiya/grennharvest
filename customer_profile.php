@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .profile-icon {
             width: 120px;
             height: 120px;
-            background: linear-gradient(135deg, #2c3e50, #2c3e50);
+           background: linear-gradient(45deg, #28a745, #218838);
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 60px;
             color: white;
             margin: 0 auto 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px hsla(118, 83%, 47%, 0.20);
         }
 
         .profile-info {
@@ -91,11 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .profile-info span {
             font-weight: bold;
-            color: #2c3e50;
+            color: rgba(104, 181, 36, 1);
         }
 
         .edit-btn {
-            background: linear-gradient(135deg, #2c3e50, #2c3e50);
+          background: linear-gradient(45deg, #28a745, #218838);
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 8px;
         }
         .btn-dark{
-            background-color: #2c3e50;
+            background-color: #2c503aff;
         }
     </style>
 </head>
@@ -126,10 +126,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="profile-container">
     <div class="profile-card">
-        <h2 class="mb-3">👤 PROFILE</h2>
+<h2 class="mb-3" style="color: #28a745;">
+    <b>PROFILE</b>
+</h2><hr>
         <div class="profile-icon">
-            <i class="fas fa-user"></i>
-        </div>
+    <?php echo strtoupper(substr($customer['name'], 0, 1)); ?>
+</div>
+
         <p class="profile-info"><span>Name:</span> <?php echo htmlspecialchars($customer['name']); ?></p>
         <p class="profile-info"><span>Email:</span> <?php echo htmlspecialchars($customer['email']); ?></p>
         <p class="profile-info"><span>City:</span> <?php echo htmlspecialchars($customer['city']); ?></p>
