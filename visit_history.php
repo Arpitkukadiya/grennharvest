@@ -17,133 +17,110 @@ $stmt = $conn->prepare("SELECT fv.id, fv.date, fv.description, fv.status, f.name
 $stmt->execute([$customer_id]);
 $visits = $stmt->fetchAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Farm Visit History</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            background: linear-gradient(to right, #e6f0ff, #f0f4f8);
-            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #e0f7fa, #f0f4f8);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        h2 {
+            font-weight: 700;
+            color: #2c3e50;
         }
 
         .card {
             border-radius: 16px;
-            transition: 0.4s ease;
-            background: #ffffff;
-            position: relative;
             overflow: hidden;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: none;
         }
 
         .card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(60deg, #00ff99, #00ccff, #ff99cc, #00ff99);
-            animation: shine 3s linear infinite;
-            z-index: 0;
-            opacity: 0.1;
-        }
-
-        @keyframes shine {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .card-body, .card-header {
-            position: relative;
-            z-index: 2;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
         .card-header {
+            background-color: #00796b;
+            color: white;
             font-size: 1.2rem;
-            font-weight: bold;
-            background-color: #2c3e50;
-            color: #fff;
-            border-radius: 16px 16px 0 0;
+            font-weight: 600;
         }
 
         .status-pill {
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 1rem;
-            font-weight: bold;
-            display: inline-block;
+            font-size: 0.95rem;
+            font-weight: 500;
             text-transform: capitalize;
         }
 
         .status-requested {
-            color: #ffc107;
             background-color: #fff3cd;
+            color: #856404;
         }
 
         .status-approved {
-            color: #28a745;
             background-color: #d4edda;
+            color: #155724;
         }
 
         .status-rejected {
-            color: #dc3545;
             background-color: #f8d7da;
+            color: #721c24;
         }
 
-        .vertical-status {
+        .horizontal-status {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            margin-top: 25px;
-            gap: 16px;
+            margin-top: 15px;
+            gap: 20px;
         }
 
         .status-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
         }
 
         .status-step .emoji {
-            font-size: 42px;
-            width: 60px;
-            height: 60px;
+            font-size: 28px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: #e0e0e0;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.4s ease;
-            box-shadow: none;
+            margin: 0 auto 5px;
         }
 
         .status-step.active .emoji {
-            background-color: #28a745;
+            background-color: #4caf50;
             color: white;
-            box-shadow: 0 0 20px 6px rgba(40, 167, 69, 0.7);
             animation: pulse 1.8s infinite;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
         }
 
-        .status-step.rejected .emoji {
-            background-color: #dc3545;
-            color: white;
-            box-shadow: 0 0 20px 6px rgba(220, 53, 69, 0.7);
+        .status-step.rejected.active .emoji {
+            background-color: #e53935;
             animation: blink 1s infinite;
+            box-shadow: 0 0 15px rgba(229, 57, 53, 0.6);
         }
 
-        .status-step label {
-            font-size: 15px;
-            margin-top: 5px;
+        .status-step.active label {
             font-weight: 600;
+            color: #333;
         }
 
         @keyframes pulse {
@@ -156,25 +133,20 @@ $visits = $stmt->fetchAll();
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-
-        .text-center h2 {
-            font-weight: 700;
-            color: #333;
-        }
     </style>
 </head>
 <body>
 
 <?php include "navbar.php"; ?>
 
-<div class="container mt-4 px-4">
+<div class="container mt-4 px-3">
     <h2 class="text-center mb-4">🌾 Farm Visit Request History</h2>
 
     <?php if (count($visits) > 0): ?>
         <div class="row">
             <?php foreach ($visits as $visit): ?>
-                <div class="col-md-4">
-                    <div class="card mb-4">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card">
                         <div class="card-header">
                             👨‍🌾 Farmer: <?= htmlspecialchars($visit['farmer_name']); ?>
                         </div>
@@ -191,8 +163,7 @@ $visits = $stmt->fetchAll();
                                 <?php endif; ?>
                             </p>
 
-                            <!-- Enhanced Vertical Emoji Tracker -->
-                            <div class="vertical-status">
+                            <div class="horizontal-status">
                                 <div class="status-step <?= $visit['status'] === 'requested' ? 'active' : '' ?>">
                                     <div class="emoji">📩</div>
                                     <label>Requested</label>
@@ -206,15 +177,14 @@ $visits = $stmt->fetchAll();
                                     <label>Rejected</label>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
     <?php else: ?>
-        <div class="text-center">
-            <h4 class="text-muted">No farm visit requests found.</h4>
+        <div class="text-center text-muted">
+            <h4>No farm visit requests found.</h4>
         </div>
     <?php endif; ?>
 </div>
